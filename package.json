@@ -1,0 +1,51 @@
+{
+  "name": "uws",
+  "description": "Tiny WebSockets",
+  "version": "0.14.5",
+  "homepage": "https://github.com/spiesolo/uWebSockets",
+  "author": {
+    "name": "Alex Hultman",
+    "email": "alexhultman@gmail.com",
+    "url": "https://github.com/alexhultman"
+  },
+  "maintainers": [
+    {
+      "name": "alexhultman",
+      "email": "alexhultman@gmail.com"
+    }
+  ],
+  "binary": {
+    "module_name": "node_uws",
+    "module_path": "./lib/binding/{node_abi}-{platform}-{arch}",
+    "host": "https://mapbox-node-binary.s3.amazonaws.com",
+    "remote_path": "./{name}/v{version}/{toolset}/",
+    "package_name": "{node_abi}-{platform}-{arch}.tar.gz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spiesolo/uWebSockets.git"
+  },
+  "dependencies": {
+    "node-pre-gyp": "~0.6.32"
+  },
+  "bundledDependencies": [
+      "node-pre-gyp"
+  ],
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "scripts": {
+    "prepublish": "npm ls",
+    "install": "node-pre-gyp install --fallback-to-build"
+  },
+  "license": "Zlib",
+  "engines": {
+    "node": ">=4"
+  },
+  "keywords": [
+    "tiny",
+    "websockets",
+    "android"
+  ],
+  "main": "uws.js",
+  "readme": "ERROR: No README data found!"
+}
