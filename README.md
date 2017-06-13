@@ -1,68 +1,52 @@
 <div align="center"><img src="misc/images/logo.png"/></div>
 
-`µWS` is one of the most lightweight, efficient & scalable WebSocket & HTTP server implementations available. It features an easy-to-use, fully async object-oriented interface and scales to millions of connections using only a fraction of memory compared to the competition. While performance and scalability are two of our top priorities, we consider security, stability and standards compliance paramount. License is zlib/libpng (very permissive & suits commercial applications).
+This is fork of `µWS` project, with modifications to support node, node-gyp, node-pre-gyp and cross compile with Android NDK for Android device.
 
+# Cross-compile for Android
 
-* Autobahn tests [all pass](http://htmlpreview.github.io/?https://github.com/uWebSockets/uWebSockets/blob/master/misc/autobahn/index.html).
-* One million WebSockets require ~111mb of user space memory (104 bytes per WebSocket).
-* Single-threaded throughput of up to 5 million HTTP req/sec or 20 million WebSocket echoes/sec.
-* Linux, OS X, Windows & [Node.js](http://github.com/uWebSockets/bindings) support.
-* Runs with raw epoll, libuv or ASIO (C++17-ready).
-* Valgrind & AddressSanitizer clean.
-* Permessage-deflate, SSL/TLS support & integrates with foreign HTTP(S) servers.
-* Multi-core friendly & optionally thread-safe via compiler flag UWS_THREADSAFE.
+## Prerequisite
 
-[![](https://api.travis-ci.org/uWebSockets/uWebSockets.svg?branch=master)](https://travis-ci.org/uWebSockets/uWebSockets)
+Cross-compiling nodejs, and node modules (should have support to node-pre-gyp) requires standalone Android NDK to be installed firstly. Android NDK can be downloaded at [Android developer]( https://developer.android.com/ndk/downloads/index.html) or [China Android developer](https://developer.android.google.cn/ndk/downloads/index.html) website for chinese mainland user.
 
-## Simple & modern
-The interface has been designed for simplicity and only requires you to write a few lines of code to get a working server:
-```c++
-#include <uWS/uWS.h>
+Android NDK provides a script, at build/tools/make-standalong-toolchain.sh, that can be used with to generate the standalone toolchain. Below is an example used for standalone toolchain generation for Android Jellybean device.
 
-int main() {
-    uWS::Hub h;
-
-    h.onMessage([](uWS::WebSocket<uWS::SERVER> *ws, char *message, size_t length, uWS::OpCode opCode) {
-        ws->send(message, length, opCode);
-    });
-
-    h.onHttpRequest([](uWS::HttpResponse *res, uWS::HttpRequest req, char *data, size_t length, size_t remainingBytes) {
-        res->end(const char *, size_t);
-    });
-
-    h.listen(3000);
-    h.run();
-}
 ```
-Get the sources of the uws.chat server [here](https://github.com/uWebSockets/website/blob/master/main.cpp). Learn from the tests [here](tests/main.cpp).
+# /path/to/android-ndk/build/tools/make-standalone-toolchain.sh \
+    --toolchain=arm-linux-androideabi-4.6 \
+    --arch=arm \
+    --install-dir=/path/to/standalone/toolchain \
+    --platform=android-17
+```
 
-## Not your average server
-µWS was designed to perform well across the board, not just in one specific dimension. With excellent memory usage paired with high throughput it outscales Socket.IO by 180x.
+Change \-\-toolchain & \-\-platform options to fit your Android version.
 
-<div align="center"><img src="misc/images/overview.png"/></div>
+## Cross-toolchain setup
 
-*Benchmarks are run with default settings in all libraries, except for `ws` which is run with the native performance addons. Read more about the benchmarks [here](benchmarks).*
+```
+# export CC=/path/to/standalone/toolchain/bin/arm-linux-androideabi-gcc
+# export AR=/path/to/standalone/toolchain/bin/arm-linux-androideabi-ar
+# export CXX=/path/to/standalone/toolchain/bin/arm-linux-androideabi-g++
+# export LINK=/path/to/standalone/toolchain/bin/arm-linux-androideabi-g++
+```
 
-## Perfect for WebRTC
-Distributed WebRTC networks typically employ WebSockets for peer signalling. Since every single peer in the entire distributed network requires a persistent connection to the signalling server at all times, only a scalable WebSocket server will do.
+The node-gyp will use these settings to compile and link the target.
 
-## Getting started
-#### Dependencies
-First of all you need to install the required dependencies. This is very easily done with a good open source package manager like [Homebrew](http://brew.sh) for OS X, [vcpkg](https://github.com/Microsoft/vcpkg) for Windows or your native Linux package manager.
+## Install dependency packages
 
-* OpenSSL 1.x.x
-* zlib 1.x
-* libuv 1.3+ *or* Boost.Asio 1.x (both optional on Linux)
+Just simply do __npm install__ in uWebSockets to install the dependency packages. node-pre-gyp is needed for the cross compiling.
 
-If you wish to integrate with a specific event-loop you can define `USE_ASIO` or `USE_LIBUV` as a global compilation flag and then link to respective libraries. `USE_EPOLL` is default on Linux while other systems default to `USE_LIBUV`.
+## Configure
 
-* Fedora: `sudo dnf install openssl-devel zlib-devel`
-* Homebrew: `brew install openssl zlib libuv`
-* Vcpkg: `vcpkg install openssl zlib libuv` *and/or* `vcpkg install openssl:x64-windows zlib:x64-windows libuv:x64-windows`
+```
+# ./node_modules/node-pre-gyp/bin/node-pre-gyp --target_arch=arm --target_platform=android --target=6.10.3 --nodedir=/path/to/6.10.3/nodejs configure
+```
 
-#### Compilation
-###### OS X & Linux
-* `make`
-* `sudo make install` (or as you wish)
-###### Windows
-* Compile `VC++.vcxproj` with Visual C++ Community Edition 2015 or later.
+Note that \-\-target and \-\-nodedir are only needed if compile for a specific nodejs version used on the device.
+
+## build
+
+```
+# ./node_modules/node-pre-gyp/bin/node-pre-gyp build
+```
+
+When build completed, the generated binary can be found at ./lib/binding/node-v48-android-arm/node_uws.node
