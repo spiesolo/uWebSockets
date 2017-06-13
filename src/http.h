@@ -134,7 +134,10 @@ struct HttpServer {
         static void writeHead(const FunctionCallbackInfo<Value> &args) {
             uWS::HttpResponse *res = (uWS::HttpResponse *) args.Holder()->GetAlignedPointerFromInternalField(0);
             if (res) {
-                std::string head = "HTTP/1.1 " + std::to_string(args[0]->IntegerValue()) + " ";
+                char buffer[64];
+                snprintf(buffer, sizeof(buffer), "%lld", args[0]->IntegerValue());
+
+                std::string head = "HTTP/1.1 " + std::string(buffer) + " ";
 
                 if (args.Length() > 1 && args[1]->IsString()) {
                     NativeString statusMessage(args[1]);

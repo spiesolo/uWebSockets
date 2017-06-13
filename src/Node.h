@@ -93,7 +93,11 @@ public:
         memset(&hints, 0, sizeof(addrinfo));
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_STREAM;
-        if (getaddrinfo(hostname, std::to_string(port).c_str(), &hints, &result) != 0) {
+
+        char buffer[32];
+        snprintf(buffer, sizeof(buffer), "%d", port);
+
+        if (getaddrinfo(hostname, buffer, &hints, &result) != 0) {
             return nullptr;
         }
 
@@ -133,7 +137,10 @@ public:
 
         Context *netContext = nodeData->netContext;
 
-        if (getaddrinfo(host, std::to_string(port).c_str(), &hints, &result)) {
+        char buffer[32];
+        snprintf(buffer, sizeof(buffer), "%d", port);
+
+        if (getaddrinfo(host, buffer, &hints, &result)) {
             return true;
         }
 
